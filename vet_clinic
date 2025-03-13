@@ -1,0 +1,167 @@
+-- Жаңа пайдаланушы (схема) құру
+CREATE USER c##vet_clinic IDENTIFIED BY strong_password;
+
+GRANT CONNECT, RESOURCE TO c##vet_clinic;
+ALTER USER c##vet_clinic QUOTA UNLIMITED ON USERS;
+
+-- Кестені жаңа схема ішінде құру
+CREATE TABLE animals (
+    animal_id NUMBER PRIMARY KEY,
+    name VARCHAR2(50),
+    species VARCHAR2(50),
+    breed VARCHAR2(50),
+    age NUMBER,
+    owner_id NUMBER
+);
+
+-- Пайдаланушылар құру
+CREATE USER C##vet_admin IDENTIFIED BY password;
+CREATE USER C##vet_doctor IDENTIFIED BY password;
+CREATE USER C##vet_receptionist IDENTIFIED BY password;
+
+-- Рөлдер құру
+CREATE ROLE C##admin_role;
+CREATE ROLE C##doctor_role;
+CREATE ROLE C##receptionist_role;
+-- Артықшылықтар беру
+GRANT ALL PRIVILEGES TO C##admin_role;
+GRANT SELECT, INSERT, UPDATE ON animals TO C##doctor_role;
+GRANT SELECT, INSERT ON C##vet_clinic.appointments TO C##receptionist_role;
+
+CREATE TABLE C##VET_CLINIC.animals (
+    animal_id NUMBER PRIMARY KEY,
+    name VARCHAR2(50),
+    species VARCHAR2(50),
+    breed VARCHAR2(50),
+    age NUMBER,
+    owner_id NUMBER
+);
+
+CREATE TABLE C##VET_CLINIC.appointments (
+    appointment_id NUMBER PRIMARY KEY,
+    animal_id NUMBER,
+    vet_id NUMBER,
+    appointment_date DATE,
+    description VARCHAR2(200),
+    CONSTRAINT fk_animal FOREIGN KEY (animal_id) REFERENCES C##VET_CLINIC.animals(animal_id)
+);
+
+GRANT ALL PRIVILEGES TO C##admin_role;
+GRANT SELECT, INSERT, UPDATE ON C##vet_clinic.animals TO C##doctor_role;
+GRANT SELECT, INSERT ON C##vet_clinic.appointments TO C##receptionist_role;
+
+
+SELECT role FROM dba_roles WHERE role LIKE 'C##%';
+
+SELECT granted_role FROM dba_role_privs WHERE grantee = 'C##VET_ADMIN';
+
+
+-- Пайдаланушыларға рөлдерді тағайындау
+GRANT C##admin_role TO C##vet_admin;
+GRANT C##doctor_role TO C##vet_doctor;
+GRANT C##receptionist_role TO C##vet_receptionist;
+
+
+
+-- Кестелер құру
+CREATE TABLE animals (
+    animal_id NUMBER PRIMARY KEY,
+    name VARCHAR2(50),
+    species VARCHAR2(50),
+    breed VARCHAR2(50),
+    age NUMBER,
+    owner_id NUMBER
+);
+
+CREATE TABLE owners (
+    owner_id NUMBER PRIMARY KEY,
+    first_name VARCHAR2(50),
+    last_name VARCHAR2(50),
+    phone VARCHAR2(20)
+);
+
+CREATE TABLE appointments (
+    appointment_id NUMBER PRIMARY KEY,
+    animal_id NUMBER,
+    vet_id NUMBER,
+    appointment_date DATE,
+    description VARCHAR2(200),
+    CONSTRAINT fk_animal FOREIGN KEY (animal_id) REFERENCES animals(animal_id)
+);
+
+CREATE TABLE veterinarians (
+    vet_id NUMBER PRIMARY KEY,
+    first_name VARCHAR2(50),
+    last_name VARCHAR2(50),
+    specialty VARCHAR2(50)
+);
+
+-- Индекстер қосу
+CREATE INDEX idx_animal_name ON animals(name);
+CREATE INDEX idx_appointment_date ON appointments(appointment_date);
+
+-- Кесте көлемін оңтайландыру
+ALTER TABLE animals MOVE TABLESPACE users;
+
+
+INSERT INTO owners VALUES (1, 'Иесі 1', 'Тегі 1', '87010000001');
+INSERT INTO owners VALUES (2, 'Иесі 2', 'Тегі 2', '87010000002');
+INSERT INTO owners VALUES (3, 'Иесі 3', 'Тегі 3', '87010000003');
+INSERT INTO owners VALUES (4, 'Иесі 4', 'Тегі 4', '87010000004');
+INSERT INTO owners VALUES (5, 'Иесі 5', 'Тегі 5', '87010000005');
+INSERT INTO owners VALUES (6, 'Иесі 6', 'Тегі 6', '87010000006');
+INSERT INTO owners VALUES (7, 'Иесі 7', 'Тегі 7', '87010000007');
+INSERT INTO owners VALUES (8, 'Иесі 8', 'Тегі 8', '87010000008');
+INSERT INTO owners VALUES (9, 'Иесі 9', 'Тегі 9', '87010000009');
+INSERT INTO owners VALUES (10, 'Иесі 10', 'Тегі 10', '87010000010');
+
+INSERT INTO animals VALUES (1, 'Жануар 1', 'Ит', 'Алабай', 3, 1);
+INSERT INTO animals VALUES (2, 'Жануар 2', 'Мысық', 'Перс', 2, 2);
+INSERT INTO animals VALUES (3, 'Жануар 3', 'Қоян', 'Аққоян', 1, 3);
+INSERT INTO animals VALUES (4, 'Жануар 4', 'Ит', 'Лабрадор', 4, 4);
+INSERT INTO animals VALUES (5, 'Жануар 5', 'Мысық', 'Сфинкс', 5, 5);
+INSERT INTO animals VALUES (6, 'Жануар 6', 'Қоян', 'Сұрқоян', 2, 6);
+INSERT INTO animals VALUES (7, 'Жануар 7', 'Ит', 'Боксёр', 3, 7);
+INSERT INTO animals VALUES (8, 'Жануар 8', 'Мысық', 'Мейн-Кун', 4, 8);
+INSERT INTO animals VALUES (9, 'Жануар 9', 'Қоян', 'Қарақоян', 2, 9);
+INSERT INTO animals VALUES (10, 'Жануар 10', 'Ит', 'Далматин', 6, 10);
+
+INSERT INTO veterinarians VALUES (1, 'Вет 1', 'Дәрігер 1', 'Терапия');
+INSERT INTO veterinarians VALUES (2, 'Вет 2', 'Дәрігер 2', 'Хирургия');
+INSERT INTO veterinarians VALUES (3, 'Вет 3', 'Дәрігер 3', 'Терапия');
+INSERT INTO veterinarians VALUES (4, 'Вет 4', 'Дәрігер 4', 'Хирургия');
+INSERT INTO veterinarians VALUES (5, 'Вет 5', 'Дәрігер 5', 'Терапия');
+
+INSERT INTO appointments VALUES (1, 1, 1, TO_DATE('2025-03-10', 'YYYY-MM-DD'), 'Вакцинация');
+INSERT INTO appointments VALUES (2, 2, 2, TO_DATE('2025-03-11', 'YYYY-MM-DD'), 'Хирургиялық тексеру');
+INSERT INTO appointments VALUES (3, 3, 3, TO_DATE('2025-03-12', 'YYYY-MM-DD'), 'Жалпы тексеру');
+INSERT INTO appointments VALUES (4, 4, 4, TO_DATE('2025-03-13', 'YYYY-MM-DD'), 'Ота жасау');
+INSERT INTO appointments VALUES (5, 5, 5, TO_DATE('2025-03-14', 'YYYY-MM-DD'), 'Терапиялық ем');
+
+COMMIT;
+
+
+
+
+-- JOIN сұранысы
+SELECT a.name, o.first_name, o.last_name
+FROM animals a
+JOIN owners o ON a.owner_id = o.owner_id;
+
+-- GROUP BY және HAVING
+SELECT species, COUNT(*)
+FROM animals
+GROUP BY species
+HAEXPLAIN PLAN FOR
+SELECT * FROM animals WHERE name = 'Tom';
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);VING COUNT(*) > 1;
+
+-- Индекс тексеру
+
+
+-- Агрегаттық функциялар
+SELECT AVG(age) AS avg_age FROM animals;
+
+-- WHERE фильтрациясы
+SELECT * FROM appointments
+WHERE appointment_date BETWEEN TO_DATE('2025-01-01', 'YYYY-MM-DD') AND TO_DATE('2025-12-31', 'YYYY-MM-DD');
